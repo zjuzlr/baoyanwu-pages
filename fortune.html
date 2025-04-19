@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+
+{% block title %}每日抽签 - 保研坞解压驿站{% endblock %}
+
+{% block head_extra %}
+<style>
+    /* 烟花容器 */
+    #fireworks-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 3000;
+        display: none;
+    }
+
+    /* 签文不同等级背景色 */
+    .fortune-box {
+        margin-top:30px;
+        padding:20px;
+        border-radius:12px;
+        box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
+        font-size:24px;
+        font-weight:bold;
+    }
+    .big { background-color: #ffe066; }     /* 金黄色 - 大吉 */
+    .small { background-color: #d4edda; }   /* 绿色 - 小吉 */
+    .bad { background-color: #f8d7da; }     /* 粉红 - 小凶 */
+    .normal { background-color: #d1ecf1; }  /* 蓝色 - 平运 */
+    .other { background-color: #f0f0f0; }   /* 灰色 - 其他 */
+</style>
+{% endblock %}
+
+{% block content %}
+<div style="max-width:600px; margin:80px auto; padding:30px; background:white; border-radius:10px; box-shadow:0 0 10px rgba(0,0,0,0.1); text-align:center;">
+    <h1 style="font-size:28px; margin-bottom:20px;">🔮 每日抽签</h1>
+    <p style="font-size:20px; color:#555;">今天是 {{ today }}</p>
+
+    <!-- 签文展示，动态加 class -->
+    <div class="fortune-box {{ fortune_level }}">
+        {{ fortune }}
+    </div>
+
+    <!-- TIPS 提示（仅小吉/小凶） -->
+    {% if tips %}
+        <div style="margin-top:20px; font-size:16px; color:#555; background:#fefefe; padding:10px; border-left:4px solid #5cb85c; border-radius:6px;">
+            {{ tips }}
+        </div>
+    {% endif %}
+
+    <!-- 许愿按钮（仅大吉） -->
+    {% if is_big_fortune %}
+        <button onclick="openWish()" style="margin-top:25px; padding:10px 20px; font-size:16px; background:#ff9800; color:white; border:none; border-radius:6px; cursor:pointer;">
+            🙏 许下我的保研愿望
+        </button>
+    {% endif %}
+
+    <p style="margin-top:30px; font-size:16px; color:#888;">明天再来看看新的运势吧 ✨</p>
+</div>
+
+<!-- 烟花容器 -->
+<div id="fireworks-container"></div>
+
+<!-- 引入 fireworks-js -->
+<script src="https://cdn.jsdelivr.net/npm/fireworks-js@2.1.0/dist/index.umd.min.js"></script>
+
+<script>
+    const isBigFortune = {{ "true" if is_big_fortune else "false" }};
+
+    // 烟花效果 (仅大吉)
+    if (isBigFortune) {
+        const container = document.getElementById('fireworks-container');
+        container.style.display = 'block';
+        const fireworks = new Fireworks.default(container, {
+            speed: 2,
+            acceleration: 1.05,
+            friction: 0.95,
+            gravity: 1.5,
+            particles: 100,
+            trace: 5,
+            explosion: 5,
+            autoresize: true
+        });
+        fireworks.start();
+
+        // 3秒后自动停止烟花
+        setTimeout(() => {
+            fireworks.stop();
+            container.style.display = 'none';
+        }, 3000);
+    }
+
+    // 许愿弹窗
+    function openWish() {
+        document.getElementById("wishModal").style.display = "block";
+    }
+
+    function closeWish() {
+        document.getElementById("wishModal").style.display = "none";
+    }
+
+    function submitWish() {
+        const wish = document.getElementById("wishInput").value.trim();
+        if (!wish) {
+            alert("请输入你的愿望哦~");
+            return;
+        }
+
+        alert("✨ 愿你心愿成真：\n" + wish);
+        closeWish();
+    }
+</script>
+
+<!-- 许愿弹窗 -->
+<div id="wishModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background-color:rgba(0,0,0,0.5); z-index:4000;">
+    <div style="background:white; max-width:400px; margin:100px auto; padding:30px; border-radius:10px; text-align:center; position:relative;">
+        <h3 style="margin-bottom:15px;">🎯 许下一个愿望</h3>
+        <input type="text" id="wishInput" placeholder="希望我顺利通过复试..." style="width:100%; padding:10px; font-size:16px; margin-bottom:15px;">
+        <br>
+        <button onclick="submitWish()" style="padding:10px 20px; background:#4CAF50; color:white; border:none; border-radius:6px; cursor:pointer;">🎁 提交愿望</button>
+        <button onclick="closeWish()" style="padding:10px 20px; margin-left:10px; background:#ccc; border:none; border-radius:6px; cursor:pointer;">取消</button>
+    </div>
+</div>
+
+{% endblock %}

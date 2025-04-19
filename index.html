@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}首页 - 保研坞解压驿站{% endblock %}
+
+{% block content %}
+<div style="max-width:600px; margin:80px auto; padding:30px; background:white; border-radius:10px; box-shadow:0 0 10px rgba(0,0,0,0.1); text-align:center;">
+    <h1 style="font-size:28px; margin-bottom:20px;">🎯 欢迎来到保研坞解压驿站</h1>
+    <p style="margin-top:15px; font-size:18px; color:#555;">
+        这里是属于你的轻松小站，探索MBTI性格，记录保研旅程，还有每日签文指引心灵 ✨
+    </p>
+
+    <!-- 🚀 MBTI测评按钮 -->
+    <a href="/mbti" style="display:inline-block; margin-top:20px; padding:14px 28px; background-color:#4CAF50; color:white; border-radius:8px; text-decoration:none; font-size:18px; width:100%; max-width:300px;">
+        🚀 开始 MBTI 趣味小测试
+    </a>
+
+    <!-- ✏️ 保研记录按钮 -->
+    <a href="/journey" style="display:inline-block; margin-top:20px; padding:14px 28px; background-color:#3498db; color:white; border-radius:8px; text-decoration:none; font-size:18px; width:100%; max-width:300px;">
+        ✏️ 记录我的保研之旅
+    </a>
+
+    <!-- 🔮 每日抽签按钮 -->
+    <a href="/fortune" style="display:inline-block; margin-top:20px; padding:14px 28px; background-color:#9b59b6; color:white; border-radius:8px; text-decoration:none; font-size:18px; width:100%; max-width:300px;">
+        🔮 每日抽签看看运势
+    </a>
+
+    <!-- 🧭 保研流程按钮 -->
+    <a href="/timeline" style="display:inline-block; margin-top:20px; padding:14px 28px; background-color:#f39c12; color:white; border-radius:8px; text-decoration:none; font-size:18px; width:100%; max-width:300px;">
+        🧭 保研流程
+    </a>
+</div>
+{% endblock %}

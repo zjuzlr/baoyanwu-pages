@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+
+{% block title %}保研之旅记录 - 保研坞解压驿站{% endblock %}
+
+{% block head_extra %}
+<style>
+    .image-thumb {
+        max-width: 120px;
+        max-height: 100px;
+        margin: 5px;
+        cursor: pointer;
+        border-radius: 6px;
+        transition: transform 0.2s;
+    }
+
+    .image-thumb:hover {
+        transform: scale(1.05);
+    }
+
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 2000;
+        padding-top: 60px;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0,0,0,0.8);
+    }
+
+    .modal-content {
+        margin: auto;
+        display: block;
+        max-width: 80%;
+        max-height: 80%;
+        border-radius: 8px;
+    }
+
+    .close {
+        position: absolute;
+        top: 40px;
+        right: 50px;
+        color: white;
+        font-size: 36px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div style="max-width:1000px; margin:80px auto; background:white; padding:30px; border-radius:10px; box-shadow:0 0 15px rgba(0,0,0,0.1);">
+
+    <h1 style="text-align:center; font-size:28px; margin-bottom:30px;">📚 我的保研之旅记录</h1>
+
+    <!-- 导出Excel按钮 -->
+    <div style="text-align:right; margin-bottom:20px;">
+        <a href="/journey/export_xlsx" style="padding:10px 20px; background-color:#2ecc71; color:white; text-decoration:none; border-radius:8px; font-size:16px;">
+            📥 导出Excel
+        </a>
+    </div>
+
+    <!-- 添加新记录表单 -->
+    <form method="post" enctype="multipart/form-data" style="margin-bottom:40px;">
+        <input type="text" name="school" placeholder="面试院校" required style="width:100%; padding:12px; margin-bottom:15px; border-radius:8px; border:1px solid #ccc;">
+        <input type="date" name="interview_date" required style="width:100%; padding:12px; margin-bottom:15px; border-radius:8px; border:1px solid #ccc;">
+        <textarea name="process" placeholder="考核流程（如笔试+面试）" rows="2" required style="width:100%; padding:12px; margin-bottom:15px; border-radius:8px; border:1px solid #ccc;"></textarea>
+        <textarea name="lesson" placeholder="保研教训总结" rows="2" required style="width:100%; padding:12px; margin-bottom:15px; border-radius:8px; border:1px solid #ccc;"></textarea>
+        <input type="file" name="images" accept="image/*" multiple style="margin-bottom:20px;">
+        <button type="submit" style="width:100%; padding:14px; background-color:#4CAF50; color:white; border:none; border-radius:8px; font-size:18px; cursor:pointer;">
+            ➕ 添加记录
+        </button>
+    </form>
+
+    <hr style="margin-bottom:30px;">
+
+    {% if records %}
+    <table style="width:100%; border-collapse:collapse; font-size:16px;">
+        <thead>
+            <tr style="background-color:#f0f0f0; text-align:center;">
+                <th style="padding:12px;">院校</th>
+                <th style="padding:12px;">时间</th>
+                <th style="padding:12px;">流程</th>
+                <th style="padding:12px;">教训</th>
+                <th style="padding:12px;">图片</th>
+                <th style="padding:12px;">操作</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for record in records %}
+            <tr style="border-top:1px solid #ddd; text-align:center;">
+            {% if editing_id is not none and record.id == editing_id %}
+                <!-- 编辑模式 -->
+                <form method="post" action="/journey/edit/{{ record.id }}">
+                    <td><input type="text" name="school" value="{{ record.school }}" required style="width:100%; padding:6px; border-radius:6px; border:1px solid #ccc;"></td>
+                    <td><input type="date" name="interview_date" value="{{ record.interview_date }}" required style="width:100%; padding:6px; border-radius:6px; border:1px solid #ccc;"></td>
+                    <td><input type="text" name="process" value="{{ record.process }}" required style="width:100%; padding:6px; border-radius:6px; border:1px solid #ccc;"></td>
+                    <td><input type="text" name="lesson" value="{{ record.lesson }}" required style="width:100%; padding:6px; border-radius:6px; border:1px solid #ccc;"></td>
+                    <td>（图片不可编辑）</td>
+                    <td>
+                        <button type="submit" style="padding:6px 12px; background-color:#4CAF50; color:white; border:none; border-radius:6px;">💾 保存</button><br>
+                        <a href="/journey" style="color:#888; text-decoration:none;">取消</a>
+                    </td>
+                </form>
+            {% else %}
+                <!-- 普通显示模式 -->
+                <td>{{ record.school }}</td>
+                <td>{{ record.interview_date }}</td>
+                <td>{{ record.process }}</td>
+                <td>{{ record.lesson }}</td>
+                <td style="padding:10px;">
+                    {% if record.image_paths %}
+                        {% for img_path in record.image_paths %}
+                            <img src="{{ img_path }}" class="image-thumb" onclick="showModal(this.src)">
+                        {% endfor %}
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="/journey?editing_id={{ record.id }}" style="padding:6px 12px; background-color:#4CAF50; color:white; text-decoration:none; border-radius:6px; margin-bottom:5px; display:inline-block;">✏️ 编辑</a>
+                    <form method="post" action="/journey/delete/{{ record.id }}" style="display:inline;" onsubmit="return confirm('确认要删除这条记录吗？')">
+                        <button type="submit" style="padding:6px 12px; background-color:#e74c3c; color:white; border:none; border-radius:6px; cursor:pointer;">🗑 删除</button>
+                    </form>
+                </td>
+            {% endif %}
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+        <p style="text-align:center; margin-top:30px; font-size:18px;">暂无记录，快来添加你的第一条经历吧 ✨</p>
+    {% endif %}
+</div>
+
+<!-- 图片放大弹窗 -->
+<div id="imgModal" class="modal" onclick="hideModal()">
+    <span class="close" onclick="hideModal()">&times;</span>
+    <img class="modal-content" id="modalImg">
+</div>
+
+<script>
+    function showModal(src) {
+        const modal = document.getElementById("imgModal");
+        const modalImg = document.getElementById("modalImg");
+        modal.style.display = "block";
+        modalImg.src = src;
+    }
+
+    function hideModal() {
+        document.getElementById("imgModal").style.display = "none";
+    }
+</script>
+{% endblock %}
